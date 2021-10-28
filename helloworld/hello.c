@@ -3,7 +3,7 @@
 #include <linux/init.h>
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Hu Yu <hyuuhit@gmail.com>");
+MODULE_AUTHOR("liyakai <liyakai@iie.ac.cn>");
 MODULE_DESCRIPTION("hello world");
 MODULE_VERSION("0.1");
 
