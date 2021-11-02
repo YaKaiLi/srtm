@@ -33,5 +33,5 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "DF678BE4089ACC410869255");
+MODULE_INFO(srcversion, "400C35F7B0EA01C1659B222");
 MODULE_INFO(rhelversion, "8.4");
