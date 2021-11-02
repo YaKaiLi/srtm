@@ -23,12 +23,12 @@
 
 
 
-#define __NR_syscall 335	/* 系统调用号335 */
+#define __NR_srtm 335	/* 系统调用号335 */
 unsigned long * sys_call_table;
 
 unsigned int clear_and_return_cr0(void);
 void setback_cr0(unsigned int val);
-static int sys_mycall(void);
+static int srtm_mycall(void);
 
 int orig_cr0;	/* 用来存储cr0寄存器原来的值 */
 unsigned long *sys_call_table = 0;
@@ -59,7 +59,7 @@ void setback_cr0(unsigned int val)
 }
 
 /* 添加自己的系统调用函数 */
-static int sys_mycall(void)
+static int srtm_mycall(void)
 {
 	int ret = 12345;
 	printk("My syscall is successful!\n");
@@ -71,10 +71,10 @@ static int __init init_addsyscall(void)
 {
 	printk("My syscall is starting。。。\n");
 	sys_call_table = (unsigned long *)kallsyms_lookup_name("sys_call_table");	/* 获取系统调用服务首地址 */
-   	printk("sys_call_table: 0x%p\n", (int(*)(void))(sys_call_table[__NR_syscall]));
-	anything_saved = (int(*)(void))(sys_call_table[__NR_syscall]);	/* 保存原始系统调用 */
+   	printk("sys_call_table: 0x%p\n", (int(*)(void))(sys_call_table[__NR_srtm]));
+	anything_saved = (int(*)(void))(sys_call_table[__NR_srtm]);	/* 保存原始系统调用 */
 	orig_cr0 = clear_and_return_cr0();	/* 设置cr0可更改 */
-	sys_call_table[__NR_syscall] = (unsigned long)&sys_mycall;	/* 更改原始的系统调用服务地址 */
+	sys_call_table[__NR_srtm] = (unsigned long)&srtm_mycall;	/* 更改原始的系统调用服务地址 */
 	setback_cr0(orig_cr0);	/* 设置为原始的只读cr0 */
 	return 0;
 }
