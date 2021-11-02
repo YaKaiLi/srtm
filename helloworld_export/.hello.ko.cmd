@@ -1,1 +1,0 @@
-cmd_/root/srtm/helloworld/hello.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 -T ./scripts/module-common.lds  --build-id  -o /root/srtm/helloworld/hello.ko /root/srtm/helloworld/hello.o /root/srtm/helloworld/hello.mod.o ;  true
