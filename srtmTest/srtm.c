@@ -23,6 +23,7 @@
 问题思考：
 1、kallsyms_lookup_name获取到的系统调用表位置不正确，但为什么能正确运行？
 2、直接读取用户空间地址崩溃的根本原因是什么？
+3、为什么写到同一地址的函数能够分别执行呢：335 336 地址都为0x00000000a2f75fc4
 */
 
 
@@ -34,7 +35,8 @@ unsigned long * sys_call_table;
 unsigned int clear_and_return_cr0(void);
 void setback_cr0(unsigned int val);
 
-static int srtm_pull_image(char *configJSON, int *configJSONLen);
+// static int srtm_pull_image(char *configJSON, int *configJSONLen);
+static int srtm_pull_image(void);
 static int srtm_run_container(void);
 
 
@@ -68,24 +70,16 @@ void setback_cr0(unsigned int val)
 }
 
 /* 添加自己的系统调用函数 */
-static int srtm_pull_image(char *configJSON, int *configJSONLen)
+static int srtm_pull_image(void)
 {
 	int ret = 12345;
-	int* configJSONLenKernel = (int*)kmalloc(sizeof(int), GFP_KERNEL);
-    if (NULL == configJSONLenKernel) {
-        return -ENOMEM;
-    }
 	printk("srtm_pull_image syscall is successful!\n");
-	printk("configJSON point: %p\n", configJSON);
-
-	copy_from_user(configJSONLenKernel,configJSONLen, sizeof(int));
-	printk("configJSON length: %d\n", *configJSONLenKernel);
 	return ret;
 }
 
 static int srtm_run_container(void)
 {
-	int ret = 12345;
+	int ret = 123;
 	printk("srtm_run_container syscall is successful!\n");
 	return ret;
 }
