@@ -26,8 +26,8 @@ __attribute__((section("__versions"))) = {
 	{ 0xe007de41, "kallsyms_lookup_name" },
 	{ 0x362ef408, "_copy_from_user" },
 	{ 0x88db9f48, "__check_object_size" },
-	{ 0x27e1a049, "printk" },
 	{ 0xd2b09ce5, "__kmalloc" },
+	{ 0x27e1a049, "printk" },
 	{ 0x97651e6c, "vmemmap_base" },
 	{ 0xbdfb6dbb, "__fentry__" },
 	{ 0xad27f361, "__warn_printk" },
@@ -41,5 +41,5 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "0A553A7B3CE94A78AA63E4A");
+MODULE_INFO(srcversion, "098992AE2F3B3BF5000377A");
 MODULE_INFO(rhelversion, "8.4");
