@@ -24,25 +24,26 @@
 1、kallsyms_lookup_name获取到的系统调用表位置不正确，但为什么能正确运行？
 2、直接读取用户空间地址崩溃的根本原因是什么？
 3、为什么写到同一地址的函数能够分别执行呢：335 336 地址都为0x00000000a2f75fc4
+4、对指针的%d代表什么？
 */
 
 
 
 #define __NR_pull_images 335	/* 系统调用号335 */
-#define __NR_run_container 336	/* 系统调用号336 */
+// #define __NR_run_container 336	/* 系统调用号336 */
 unsigned long * sys_call_table;
 
 unsigned int clear_and_return_cr0(void);
 void setback_cr0(unsigned int val);
 
-static int srtm_pull_image(char **uintptrConfigJSON, int ***uintptrConfigJSONLen);
-static int srtm_run_container(void);
+// static int srtm_pull_image(char **uintptrConfigJSON, int *uintptrConfigJSONLen, int testInt2);
+// static int srtm_run_container(void);
 
 
 int orig_cr0;	/* 用来存储cr0寄存器原来的值 */
 unsigned long *sys_call_table = 0;
 static int (*pull_images_saved)(void);	/*定义一个函数指针，用来保存一个系统调用*/
-static int (*run_container_saved)(void);	/*定义一个函数指针，用来保存一个系统调用*/
+// static int (*run_container_saved)(void);	/*定义一个函数指针，用来保存一个系统调用*/
 /*
  * 设置cr0寄存器的第17位为0
  */
@@ -69,33 +70,36 @@ void setback_cr0(unsigned int val)
 }
 
 /* 添加自己的系统调用函数 */
-static int srtm_pull_image(char **uintptrConfigJSON, int ***uintptrConfigJSONLen)
+asmlinkage int srtm_pull_image(int __user testInt2, int __user testInt3, int __user testInt4, int __user testInt5)
 {
 	int ret = 789;
 	printk("srtm_pull_image syscall is successful!\n");
-	printk("uintptrConfigJSON point: %p\n", uintptrConfigJSON);
-	printk("uintptrConfigJSON data : %d\n", uintptrConfigJSON);
-	printk("uintptrConfigJSONLen point: %p\n", uintptrConfigJSONLen);
-	printk("uintptrConfigJSONLen data : %d\n", uintptrConfigJSONLen);
+	// printk("uintptrConfigJSON point: %p\n", uintptrConfigJSON);
+	// printk("uintptrConfigJSON data : %d\n", uintptrConfigJSON);
+	// printk("uintptrConfigJSONLen point: %p\n", uintptrConfigJSONLen);
+	// printk("uintptrConfigJSONLen data : %ld\n", uintptrConfigJSONLen);
 
 	printk("------------------------------------\n");
 
-	int ***uintptrConfigJSONlenKernel = (int ***)kmalloc(sizeof(int ***), GFP_KERNEL);
-    if (NULL == uintptrConfigJSONlenKernel) {
-		printk("configJSONLenKernel kmalloc filed");
-        return -ENOMEM;
-    }
-	copy_from_user(uintptrConfigJSONlenKernel,uintptrConfigJSONLen, sizeof(int ***));
+	int testInt = 1;
+	int *lenConfigJSONPoint = &testInt;
+	// get_user(testInt, &testInt2);
 
-	int **unsafePointerConfigJSONlenKernel = (int **)kmalloc(sizeof(int **), GFP_KERNEL);
-    if (NULL == unsafePointerConfigJSONlenKernel) {
-		printk("configJSONLenKernel kmalloc filed");
-        return -ENOMEM;
-    }
-	copy_from_user(unsafePointerConfigJSONlenKernel,uintptrConfigJSONlenKernel, sizeof(int **));
+	// int *lenConfigJSONPoint = kmalloc(sizeof(int), GFP_KERNEL);
+    // if (NULL == lenConfigJSONPoint) {
+	// 	printk("lenConfigJSONPoint kmalloc filed");
+    //     return -ENOMEM;
+    // }
+	// copy_from_user(lenConfigJSONPoint,uintptrConfigJSONLen, sizeof(int));
 
-	printk("uintptrConfigJSONlenKernel point: %p\n", uintptrConfigJSONlenKernel);
-	printk("unsafePointerConfigJSONlenKernel point: %p\n", unsafePointerConfigJSONlenKernel);
+	// printk("lenConfigJSONPoint point addr: %p\n", &lenConfigJSONPoint);
+	// printk("lenConfigJSONPoint point: %p\n", lenConfigJSONPoint);
+	// printk("lenConfigJSONPoint *data: %d\n", *lenConfigJSONPoint);
+	printk("testInt data: %d\n", testInt);
+	printk("testInt2 data: %d\n", testInt2);
+	printk("testInt3 data: %d\n", testInt3);
+	printk("testInt4 data: %d\n", testInt4);
+	printk("testInt5 data: %d\n", testInt5);
 	return ret;
 }
 
@@ -114,15 +118,15 @@ static int __init init_addsyscall(void)
 
    	printk("sys_call_table: 0x%p\n", sys_call_table);
    	printk("__NR_pull_images sys_call_table: 0x%p\n", (int(*)(void))(sys_call_table[__NR_pull_images]));
-   	printk("__NR_run_container sys_call_table: 0x%p\n", (int(*)(void))(sys_call_table[__NR_run_container]));
+   	// printk("__NR_run_container sys_call_table: 0x%p\n", (int(*)(void))(sys_call_table[__NR_run_container]));
 	
 	pull_images_saved = (int(*)(void))(sys_call_table[__NR_pull_images]);	/* 保存原始系统调用 */
-	run_container_saved = (int(*)(void))(sys_call_table[__NR_run_container]);	/* 保存原始系统调用 */
+	// run_container_saved = (int(*)(void))(sys_call_table[__NR_run_container]);	/* 保存原始系统调用 */
 
 	orig_cr0 = clear_and_return_cr0();	/* 设置cr0可更改 */
 
 	sys_call_table[__NR_pull_images] = (unsigned long)&srtm_pull_image;	/* 更改原始的系统调用服务地址 */
-	sys_call_table[__NR_run_container] = (unsigned long)&srtm_run_container;	/* 更改原始的系统调用服务地址 */
+	// sys_call_table[__NR_run_container] = (unsigned long)&srtm_run_container;	/* 更改原始的系统调用服务地址 */
 
 	setback_cr0(orig_cr0);	/* 设置为原始的只读cr0 */
 	return 0;
@@ -133,7 +137,7 @@ static void __exit exit_addsyscall(void)
 {
  	orig_cr0 = clear_and_return_cr0();	/* 设置cr0中对sys_call_table的更改权限 *//* 设置cr0可更改 */
     sys_call_table[__NR_pull_images] = (unsigned long)pull_images_saved;	/* 恢复原有的中断向量表中的函数指针的值 */
-    sys_call_table[__NR_run_container] = (unsigned long)run_container_saved;	/* 恢复原有的中断向量表中的函数指针的值 */
+    // sys_call_table[__NR_run_container] = (unsigned long)run_container_saved;	/* 恢复原有的中断向量表中的函数指针的值 */
     setback_cr0(orig_cr0);	/* 恢复原有的cr0的值 */
    	printk("SRTM syscall exit....\n");	
 }

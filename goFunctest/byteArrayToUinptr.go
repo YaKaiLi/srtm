@@ -15,12 +15,13 @@ func main() {
 	unsafePointerConfigJSON := unsafe.Pointer(&configJSON)
 	uintptrConfigJSON := (uintptr)(unsafePointerConfigJSON)
 
-	ConfigJSONlen := len(configJSON)
-	unsafePointerConfigJSONlen := unsafe.Pointer(&ConfigJSONlen)
+	configJSONlen := len(configJSON)
+	configJSONlenPoint := &configJSONlen
+	unsafePointerConfigJSONlen := unsafe.Pointer(&configJSONlen)
 	uintptrConfigJSONlen := (uintptr)(unsafePointerConfigJSONlen)
 	logrus.Infof("configJSON直出：", configJSON)
 	logrus.Infof("configJSON String：%s", configJSON)
-	logrus.Infof("configJSONlen 直出", ConfigJSONlen)
+	logrus.Infof("configJSONlen 直出", configJSONlen)
 	logrus.Infof("======================================")
 	logrus.Infof("configJSON指向的地址： %p", configJSON)
 	logrus.Infof("configJSON地址： %p", &configJSON)
@@ -30,11 +31,11 @@ func main() {
 	logrus.Infof("configJSON uintptr 大小： %d", unsafe.Sizeof(uintptrConfigJSON)) //uintptr占用8字节
 	logrus.Infof("configJSON uintptr 地址： %p", &uintptrConfigJSON)
 	logrus.Infof("======================================")
-	logrus.Infof("configJSONlen 地址： %p", &ConfigJSONlen)
+	logrus.Infof("configJSONlen point： %p", configJSONlenPoint)
 	logrus.Infof("configJSONlen unsafe.Pointer 指向的地址： %p", unsafePointerConfigJSONlen)
 	logrus.Infof("configJSONlen unsafe.Pointer 地址： %p", &unsafePointerConfigJSONlen)
 	logrus.Infof("configJSONlen uintptr 指向的地址： %p", uintptrConfigJSONlen)
-	logrus.Infof("configJSONlen uintptr 大小： %d", unsafe.Sizeof(uintptrConfigJSONlen)) //uintptr占用8字节
+	logrus.Infof("configJSONlen uintptr 占用大小： %d", unsafe.Sizeof(uintptrConfigJSONlen)) //uintptr占用8字节
 	logrus.Infof("configJSONlen uintptr 地址： %p", &uintptrConfigJSONlen)
 
 	//执行系统调用

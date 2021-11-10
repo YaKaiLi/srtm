@@ -24,13 +24,10 @@ __used
 __attribute__((section("__versions"))) = {
 	{ 0xf8cdd757, "module_layout" },
 	{ 0xe007de41, "kallsyms_lookup_name" },
-	{ 0x362ef408, "_copy_from_user" },
-	{ 0x88db9f48, "__check_object_size" },
-	{ 0xd2b09ce5, "__kmalloc" },
+	{ 0xdb7305a1, "__stack_chk_fail" },
 	{ 0x27e1a049, "printk" },
 	{ 0x97651e6c, "vmemmap_base" },
 	{ 0xbdfb6dbb, "__fentry__" },
-	{ 0xad27f361, "__warn_printk" },
 	{ 0x4c9d28b0, "phys_base" },
 	{ 0x7cd8d75e, "page_offset_base" },
 };
@@ -41,5 +38,5 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "098992AE2F3B3BF5000377A");
+MODULE_INFO(srcversion, "16ED01648876A4D4CF7C5B2");
 MODULE_INFO(rhelversion, "8.4");

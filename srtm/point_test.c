@@ -1,4 +1,14 @@
 #include <stdio.h>
+#include <sys/syscall.h>
+
+
+void getLenConfigJSON(int ***uintptrConfigJSONlen){
+
+
+    printf("uintptrConfigJSONlen data: %d\n",***uintptrConfigJSONlen);
+
+    return ;
+}
 
 void lenConfigJSON(){
     int lenConfigJSON = 10;
@@ -11,6 +21,7 @@ void lenConfigJSON(){
 	printf("uintptrConfigJSONlen ptr: %p\n",uintptrConfigJSONlen);
 	printf("uintptrConfigJSONlen data: %d\n",***uintptrConfigJSONlen);
 	printf("sizeof int***: %d\n",sizeof(int ***));
+    // getLenConfigJSON(uintptrConfigJSONlen);
     return ;
 }
 
@@ -27,10 +38,20 @@ void configJSON(){
     return ;
 }
 
+void syscallIntPoint(){
+    int lenConfigJSON = 10;
+    int *lenConfigJSONPoint = &lenConfigJSON;
+    printf("lenConfigJSONPoint x %lx\n",lenConfigJSONPoint);
+    printf("lenConfigJSONPoint p %p\n",lenConfigJSONPoint);
+    printf("lenConfigJSONPoint u %lu\n",lenConfigJSONPoint);
+    printf("%d\n",syscall(335,2,3,4,5));
+}
+
 int main(void)
 {
-    lenConfigJSON();
+    // lenConfigJSON();
     printf("=====================\n");
-    configJSON();
+    syscallIntPoint();
+    // configJSON();
 	return 0;
 }
