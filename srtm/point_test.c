@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <sys/syscall.h>
 
 
 void getLenConfigJSON(int ***uintptrConfigJSONlen){
@@ -44,14 +43,25 @@ void syscallIntPoint(){
     printf("lenConfigJSONPoint x %lx\n",lenConfigJSONPoint);
     printf("lenConfigJSONPoint p %p\n",lenConfigJSONPoint);
     printf("lenConfigJSONPoint u %lu\n",lenConfigJSONPoint);
-    printf("%d\n",syscall(335,2,3,4,5));
+    printf("%d\n",syscall(335,2,3,4,7));
+}
+
+void testaaaaaa(){
+    long pid = 0;
+    long num = 500;
+    
+    pid = syscall(335,num);
+    printf("num:%ld\n",pid);
+
+    return ;
 }
 
 int main(void)
 {
     // lenConfigJSON();
     printf("=====================\n");
-    syscallIntPoint();
+    // syscallIntPoint();
     // configJSON();
+    testaaaaaa();
 	return 0;
 }

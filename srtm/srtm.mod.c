@@ -23,11 +23,14 @@ static const struct modversion_info ____versions[]
 __used
 __attribute__((section("__versions"))) = {
 	{ 0xf8cdd757, "module_layout" },
-	{ 0x27e1a049, "printk" },
+	{ 0xe007de41, "kallsyms_lookup_name" },
 	{ 0xdb7305a1, "__stack_chk_fail" },
+	{ 0x362ef408, "_copy_from_user" },
+	{ 0x88db9f48, "__check_object_size" },
+	{ 0x27e1a049, "printk" },
 	{ 0x97651e6c, "vmemmap_base" },
 	{ 0xbdfb6dbb, "__fentry__" },
-	{ 0xa022f265, "pv_cpu_ops" },
+	{ 0xad27f361, "__warn_printk" },
 	{ 0x4c9d28b0, "phys_base" },
 	{ 0x7cd8d75e, "page_offset_base" },
 };
@@ -38,5 +41,5 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "BD9DBC284DA7CD90B5F0476");
+MODULE_INFO(srcversion, "2848DC7E8ED64ACB168D781");
 MODULE_INFO(rhelversion, "8.4");

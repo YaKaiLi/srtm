@@ -1,10 +1,10 @@
-obj-m:=srtm.o
+obj-m := srtm.o
+KERNELDIR := /lib/modules/$(shell uname -r)/build
+PWD := $(shell pwd)
 
-PWD:= $(shell pwd)
-KERNELDIR:= /lib/modules/$(shell uname -r)/build
-EXTRA_CFLAGS= -O0
-
-all:
-	make -C $(KERNELDIR)  M=$(PWD) modules
-clean:
-	make -C $(KERNELDIR) M=$(PWD) clean
+modules: 
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
+modules_install: 
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules_install
+clean: 
+	rm -rf *.o *~ core .depend .*.cmd *.ko *.mod.c .tmp_versions
