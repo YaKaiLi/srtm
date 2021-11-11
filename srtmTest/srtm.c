@@ -3,6 +3,7 @@
  #include <linux/kernel.h>
  #include <linux/unistd.h>
  #include <asm/uaccess.h>
+ #include <linux/uaccess.h>
  #include <linux/sched.h>
  
  //去系统调用表中查找一个空闲的系统调用号
@@ -54,7 +55,20 @@
  
  static asmlinkage long sys_mycall(const struct pt_regs *regs)
  {
-	 printk("the num: %ld",regs->di);
+	 printk("the int2: %ld",regs->di);
+	 printk("the int3: %ld",regs->si);
+	 printk("the int4: %ld",regs->dx);
+	 printk("the int5: %ld",regs->r10);
+	 printk("the int6: %p",regs->r8);
+
+     int testInt10 = 0;
+	 int *int10PointKernel = &testInt10;
+	 printk("the int10: %d",*int10PointKernel);
+     int __user *user_int10Point = (int *)regs->r8;
+	 int ret = raw_copy_from_user(int10PointKernel, user_int10Point, sizeof(int));
+     printk("copy ret:%d\n",ret);
+	 printk("the int10: %d",*int10PointKernel);
+     
      printk("This is my system call!\n");
      return 1;
  }

@@ -36,10 +36,6 @@ unsigned long * sys_call_table;
 unsigned int clear_and_return_cr0(void);
 void setback_cr0(unsigned int val);
 
-// static int srtm_pull_image(char **uintptrConfigJSON, int *uintptrConfigJSONLen, int testInt2);
-// static int srtm_run_container(void);
-
-
 int orig_cr0;	/* 用来存储cr0寄存器原来的值 */
 unsigned long *sys_call_table = 0;
 static int (*pull_images_saved)(void);	/*定义一个函数指针，用来保存一个系统调用*/
@@ -70,36 +66,60 @@ void setback_cr0(unsigned int val)
 }
 
 /* 添加自己的系统调用函数 */
-asmlinkage int srtm_pull_image(char **uintptrConfigJSON, int *uintptrConfigJSONLen, int testInt2, int testInt3, int testInt4, int testInt5)
+asmlinkage int srtm_pull_image(const struct pt_regs *regs)
 {
-	int ret = 789;
+	//char **uintptrConfigJSON, int *uintptrConfigJSONLen
+	//di、si、dx、r10、r8、r9
+	int retTmp = 789;
+	//字符串长度相关字段
+	int *uintPtrConfigJSONLenPointKernel = NULL;
+	int __user *uintPtrConfigJSONLenUser = NULL;
+	int copy_from_user_ret = 0;
+	//字符串相关字段
+	char __user **UintptrConfigJSONUser = NULL;
+	char __user *ConfigJSONUser = NULL;
+	char **UintptrConfigJSONKernel = NULL;
+	char *ConfigJSONKernel = NULL;
 	printk("srtm_pull_image syscall is successful!\n");
-	// printk("uintptrConfigJSON point: %p\n", uintptrConfigJSON);
-	// printk("uintptrConfigJSON data : %d\n", uintptrConfigJSON);
-	printk("uintptrConfigJSONLen point: %p\n", uintptrConfigJSONLen);
-	printk("uintptrConfigJSONLen data : %ld\n", uintptrConfigJSONLen);
-
 	printk("------------------------------------\n");
 
-	int testInt = 0;
-	int *lenConfigJSONPoint = &testInt;
 
-	// int *lenConfigJSONPoint = kmalloc(sizeof(int), GFP_KERNEL);
-    // if (NULL == lenConfigJSONPoint) {
-	// 	printk("lenConfigJSONPoint kmalloc filed");
-    //     return -ENOMEM;
-    // }
-	copy_from_user(lenConfigJSONPoint,uintptrConfigJSONLen, sizeof(int));
 
-	printk("lenConfigJSONPoint point addr: %p\n", &lenConfigJSONPoint);
-	printk("lenConfigJSONPoint point: %p\n", lenConfigJSONPoint);
-	printk("lenConfigJSONPoint *data: %d\n", *lenConfigJSONPoint);
-	printk("testInt data: %d\n", testInt);
-	printk("testInt2 data: %d\n", testInt2);
-	printk("testInt3 data: %d\n", testInt3);
-	printk("testInt4 data: %d\n", testInt4);
-	printk("testInt5 data: %d\n", testInt5);
-	return ret;
+	//拷贝configJSON长度
+	uintPtrConfigJSONLenPointKernel = kmalloc(sizeof(int), GFP_KERNEL);
+    if (NULL == uintPtrConfigJSONLenPointKernel) {
+		printk("uintPtrConfigJSONLenPointKernel kmalloc filed");
+        return -ENOMEM;
+    }
+	uintPtrConfigJSONLenUser = (int *)regs->si;
+	copy_from_user_ret = copy_from_user(uintPtrConfigJSONLenPointKernel,uintPtrConfigJSONLenUser, sizeof(int));
+	printk("uintPtrConfigJSONLenPointKernel *data: %d", *uintPtrConfigJSONLenPointKernel);
+
+
+	//拷贝configJSON字符串
+	//第一阶段
+	UintptrConfigJSONKernel = kmalloc(sizeof(char *), GFP_KERNEL);
+	if (NULL == UintptrConfigJSONKernel) {
+		printk("UintptrConfigJSONKernel kmalloc filed");
+        return -ENOMEM;
+    }
+	UintptrConfigJSONUser = (char **)regs->di;
+	copy_from_user_ret = copy_from_user(UintptrConfigJSONKernel,UintptrConfigJSONUser, sizeof(int));
+
+	//第二阶段
+	ConfigJSONKernel = kmalloc((*uintPtrConfigJSONLenPointKernel)*sizeof(char), GFP_KERNEL);
+	if (NULL == ConfigJSONKernel) {
+		printk("ConfigJSONKernel kmalloc filed");
+        return -ENOMEM;
+    }
+	ConfigJSONUser = *UintptrConfigJSONKernel;
+	copy_from_user_ret = copy_from_user(ConfigJSONKernel,ConfigJSONUser, sizeof(int));
+
+	printk("UintptrConfigJSONKernel *data: %d", *UintptrConfigJSONKernel);
+	printk("UintptrConfigJSONKernel *data: %s", ConfigJSONUser);
+
+	printk("copy_from_user_ret= %d\n", copy_from_user_ret);
+	return retTmp;
 }
 
 static int srtm_run_container(void)

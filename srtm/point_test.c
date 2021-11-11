@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <string.h>
 
 void getLenConfigJSON(int ***uintptrConfigJSONlen){
 
@@ -20,6 +20,7 @@ void lenConfigJSON(){
 	printf("uintptrConfigJSONlen ptr: %p\n",uintptrConfigJSONlen);
 	printf("uintptrConfigJSONlen data: %d\n",***uintptrConfigJSONlen);
 	printf("sizeof int***: %d\n",sizeof(int ***));
+    printf("%d\n",syscall(335,lenConfigJSONPoint,lenConfigJSONPoint));
     // getLenConfigJSON(uintptrConfigJSONlen);
     return ;
 }
@@ -37,31 +38,37 @@ void configJSON(){
     return ;
 }
 
+void configJSONAndLen(){
+    char configJSON[10] = {'c','o','d','e','\0'};
+    char *unsafePointerConfigJSON = configJSON;
+	char **uintptrConfigJSON = &unsafePointerConfigJSON;
+    int lenConfigJSON = strlen(unsafePointerConfigJSON);
+    int *lenConfigJSONPoint = &lenConfigJSON;
+    printf("configJSON: %s\n", configJSON);
+	printf("ConfigJSON ptr: %p\n",configJSON);
+	printf("unsafePointerConfigJSON ptr: %p\n",unsafePointerConfigJSON);
+	printf("unsafePointerConfigJSON data: %c\n",*unsafePointerConfigJSON);
+	printf("uintptrConfigJSON ptr: %p\n",uintptrConfigJSON);
+	printf("uintptrConfigJSON data: %c\n", **uintptrConfigJSON);
+    printf("%d\n",syscall(335,uintptrConfigJSON,lenConfigJSONPoint));
+    return ;
+}
+
 void syscallIntPoint(){
     int lenConfigJSON = 10;
     int *lenConfigJSONPoint = &lenConfigJSON;
     printf("lenConfigJSONPoint x %lx\n",lenConfigJSONPoint);
     printf("lenConfigJSONPoint p %p\n",lenConfigJSONPoint);
     printf("lenConfigJSONPoint u %lu\n",lenConfigJSONPoint);
-    printf("%d\n",syscall(335,2,3,4,7));
-}
-
-void testaaaaaa(){
-    long pid = 0;
-    long num = 500;
-    
-    pid = syscall(335,num);
-    printf("num:%ld\n",pid);
-
-    return ;
+    printf("lenConfigJSONPoint data %d\n", *lenConfigJSONPoint);
+    printf("%d\n",syscall(335,2,3,4,5,lenConfigJSONPoint));
 }
 
 int main(void)
 {
-    // lenConfigJSON();
+    configJSONAndLen();
     printf("=====================\n");
     // syscallIntPoint();
     // configJSON();
-    testaaaaaa();
 	return 0;
 }
