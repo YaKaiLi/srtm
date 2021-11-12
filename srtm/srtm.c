@@ -81,9 +81,6 @@ asmlinkage int srtm_pull_image(const struct pt_regs *regs)
 	char **UintptrConfigJSONKernel = NULL;
 	char *ConfigJSONKernel = NULL;
 	printk("srtm_pull_image syscall is successful!\n");
-	printk("------------------------------------\n");
-
-
 
 	//拷贝configJSON长度
 	uintPtrConfigJSONLenPointKernel = kmalloc(sizeof(int), GFP_KERNEL);
@@ -95,6 +92,7 @@ asmlinkage int srtm_pull_image(const struct pt_regs *regs)
 	copy_from_user_ret = copy_from_user(uintPtrConfigJSONLenPointKernel,uintPtrConfigJSONLenUser, sizeof(int));
 	printk("uintPtrConfigJSONLenPointKernel *data: %d", *uintPtrConfigJSONLenPointKernel);
 
+	printk("[stage 1 over]------------------------------------[stage 1 over]\n");
 
 	//拷贝configJSON字符串
 	//第一阶段
@@ -107,16 +105,22 @@ asmlinkage int srtm_pull_image(const struct pt_regs *regs)
 	copy_from_user_ret = copy_from_user(UintptrConfigJSONKernel,UintptrConfigJSONUser, sizeof(int));
 
 	//第二阶段
-	ConfigJSONKernel = kmalloc((*uintPtrConfigJSONLenPointKernel)*sizeof(char), GFP_KERNEL);
+	ConfigJSONKernel = kmalloc(sizeof(char), GFP_KERNEL);
 	if (NULL == ConfigJSONKernel) {
 		printk("ConfigJSONKernel kmalloc filed");
         return -ENOMEM;
     }
 	ConfigJSONUser = *UintptrConfigJSONKernel;
-	copy_from_user_ret = copy_from_user(ConfigJSONKernel,ConfigJSONUser, sizeof(int));
+	// copy_from_user_ret = copy_from_user(ConfigJSONKernel,ConfigJSONUser, sizeof(char));
 
-	printk("UintptrConfigJSONKernel *data: %d", *UintptrConfigJSONKernel);
-	printk("UintptrConfigJSONKernel *data: %s", ConfigJSONUser);
+	printk("UintptrConfigJSONKernel point: %p", UintptrConfigJSONKernel);
+	printk("UintptrConfigJSONKernel d: %d", UintptrConfigJSONKernel);
+	printk("UintptrConfigJSONKernel s: %s", UintptrConfigJSONKernel);
+
+	printk("UintptrConfigJSONKernel *point: %p", *UintptrConfigJSONKernel);
+	printk("UintptrConfigJSONKernel *d: %d", *UintptrConfigJSONKernel);
+	printk("UintptrConfigJSONKernel *s: %s", *UintptrConfigJSONKernel);
+	// printk("ConfigJSONKernel *data: %c", *ConfigJSONUser);
 
 	printk("copy_from_user_ret= %d\n", copy_from_user_ret);
 	return retTmp;
