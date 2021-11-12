@@ -1,40 +1,46 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
+#include <string.h>
 
-void getConfigJSON(char **uintptrConfigJSON){
-	char **UintptrConfigJSONKernel = NULL;
-	char *ConfigJSONKernel = NULL;
+void getConfigJSON(char **uintptrConfigJSON)
+{
+    char **UintptrConfigJSONKernel = NULL;
+    char *ConfigJSONKernel = NULL;
 
     UintptrConfigJSONKernel = malloc(sizeof(char *));
     ConfigJSONKernel = malloc(sizeof(char));
-    memcpy(UintptrConfigJSONKernel,uintptrConfigJSON,sizeof(char *));
-    memcpy(ConfigJSONKernel,UintptrConfigJSONKernel,sizeof(char));
-	printf("ConfigJSONKernel data: %c\n", *ConfigJSONKernel);
+    memcpy(UintptrConfigJSONKernel, uintptrConfigJSON, sizeof(char *));
+    printf("UintptrConfigJSONKernel data: %c\n", **UintptrConfigJSONKernel);
+    memcpy(ConfigJSONKernel, UintptrConfigJSONKernel, sizeof(char));
+    printf("ConfigJSONKernel data: %c\n", *ConfigJSONKernel);
 
-    return ;
+    return;
 }
 
-void configJSONAndLen(){
-    char configJSON[10] = {'c','o','d','e','\0'};
+void configJSONAndLen()
+{
+    char configJSON[10] = {'c', 'o', 'd', 'e', '\0'};
     char *unsafePointerConfigJSON = configJSON;
-	char **uintptrConfigJSON = &unsafePointerConfigJSON;
+    char **uintptrConfigJSON = &unsafePointerConfigJSON;
     int lenConfigJSON = strlen(unsafePointerConfigJSON);
     int *lenConfigJSONPoint = &lenConfigJSON;
     printf("configJSON: %s\n", configJSON);
-	printf("ConfigJSON ptr: %p\n",configJSON);
-	printf("unsafePointerConfigJSON ptr: %p\n",unsafePointerConfigJSON);
-	printf("unsafePointerConfigJSON data: %c\n",*unsafePointerConfigJSON);
-	printf("uintptrConfigJSON ptr: %p\n",uintptrConfigJSON);
-	printf("uintptrConfigJSON data: %c\n", **uintptrConfigJSON);
+    printf("ConfigJSON ptr: %p\n", configJSON);
+    printf("unsafePointerConfigJSON ptr: %p\n", unsafePointerConfigJSON);
+    printf("unsafePointerConfigJSON addr: %p\n", &unsafePointerConfigJSON);
+    printf("unsafePointerConfigJSON data: %c\n", *unsafePointerConfigJSON);
+    printf("uintptrConfigJSON ptr: %p\n", uintptrConfigJSON);
+    printf("uintptrConfigJSON data: %c\n", **uintptrConfigJSON);
+    printf("=====================\n");
     // printf("%d\n",syscall(335,uintptrConfigJSON,lenConfigJSONPoint));
-    getConfigJSON(**uintptrConfigJSON);
-    return ;
+    getConfigJSON(uintptrConfigJSON);
+    return;
 }
 
 int main(void)
 {
     configJSONAndLen();
     printf("=====================\n");
-	return 0;
+    return 0;
 }
