@@ -107,7 +107,7 @@ asmlinkage int srtm_pull_image(const struct pt_regs *regs)
 	// printk("UintptrConfigJSONKernel string: %s", UintptrConfigJSONKernel);
 	// printk("UintptrConfigJSONKernel *point: %p", *UintptrConfigJSONKernel);
 	// printk("UintptrConfigJSONKernel *s: %s", *UintptrConfigJSONKernel);
-	printk("[stage 1 over]------------------------------------[stage 1 over]\n");
+	// printk("[stage 1 over]------------------------------------[stage 1 over]\n");
 
 	// //第二阶段
 	ConfigJSONKernel = kmalloc(sizeof(char) * (*uintPtrConfigJSONLenPointKernel), GFP_KERNEL);
