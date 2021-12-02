@@ -7,6 +7,7 @@
 #include <linux/sched.h>
 #include <linux/kallsyms.h>
 #include <linux/slab.h>
+#include <linux/string.h>
 
 /*
 ./arch/x86/include/asm/uaccess.h:32:9: error: dereferencing pointer to incomplete type struct task_struct
@@ -76,6 +77,13 @@ asmlinkage int srtm_pull_image(const struct pt_regs *regs)
 	char __user **UintptrConfigJSONUser = NULL;
 	char **UintptrConfigJSONKernel = NULL;
 	char *ConfigJSONKernel = NULL;
+	//字符串分割
+	char *strtokStrsep = NULL;
+	int i = 0;
+	// cJSON相关字段
+	// cJSON *configJsonRoot;
+	// cJSON *configJsonRootfs;
+	// cJSON *configJsonRootfsDiffIds;
 	printk("srtm_pull_image syscall is successful!\n");
 
 	//拷贝configJSON长度
@@ -120,7 +128,22 @@ asmlinkage int srtm_pull_image(const struct pt_regs *regs)
 	// printk("ConfigJSONUser access %ld: ", access_ok(*UintptrConfigJSONKernel, sizeof(char) * (*uintPtrConfigJSONLenPointKernel)));
 	copy_from_user_ret = copy_from_user(ConfigJSONKernel, *UintptrConfigJSONKernel, sizeof(char) * (*uintPtrConfigJSONLenPointKernel));
 
-	printk("ConfigJSONKernel *data c: %c", *(ConfigJSONKernel + 2));
+	printk("ConfigJSONKernel *data c:");
+	// printk("ConfigJSONKernel *data c: %c", *(ConfigJSONKernel));
+	// configJsonRoot = cJSON_Parse(ConfigJSONKernel);
+	// configJsonRootfs = cJSON_GetObjectItem(configJsonRoot, "rootfs");
+	// configJsonRootfsDiffIds = cJSON_GetObjectItem(configJsonRootfs, "diff_ids");
+	// printk("rootfs_diff_ids array size: %d\n", cJSON_GetArraySize(configJsonRootfsDiffIds));
+	// printk("rootfs_diff_ids array 0: %s\n", cJSON_GetArrayItem(configJsonRootfsDiffIds, 0)->valuestring);
+	// printk("rootfs_diff_ids array 0: %s\n", cJSON_GetArrayItem(configJsonRootfsDiffIds, 5)->valuestring);
+
+	//分割字符串
+	// for (i = 0; i < *uintPtrConfigJSONLenPointKernel; i++)
+	// {char *result = NULL;
+	// 	printk("%c", *(ConfigJSONKernel + i));
+	// }
+	strtokStrsep = strsep(ConfigJSONKernel, ',');
+	printk("strtok result:%d", strtokStrsep);
 
 	printk("copy_from_user_ret= %d\n", copy_from_user_ret);
 	printk("[kernel function over]==========================================[kernel function over]\n");
