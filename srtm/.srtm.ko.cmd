@@ -1,1 +1,0 @@
-cmd_/root/srtm/srtm/srtm.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 -T ./scripts/module-common.lds  --build-id  -o /root/srtm/srtm/srtm.ko /root/srtm/srtm/srtm.o /root/srtm/srtm/srtm.mod.o ;  true
