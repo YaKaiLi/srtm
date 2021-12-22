@@ -11,11 +11,11 @@
 //如下的这个就是上一步获得的值
 // cat /proc/kallsyms | grep sys_call_table
 // cat /boot/System.map-`uname -r` | grep sys_call_table
-#define sys_call_table_adress 0xffffffff872001e0
+#define sys_call_table_adress 0xffffffffbd6001e0
 
 unsigned int clear_and_return_cr0(void); //清除写保护位并返回
 void setback_cr0(unsigned int val);      //恢复写保护位
-asmlinkage int sys_mycall(void);         //自定义的系统调用函数
+asmlinkage int __x86_sys_liyakai(void);  //自定义的系统调用函数
 
 int orig_cr0;
 unsigned long *sys_call_table = 0;
@@ -48,14 +48,16 @@ static int __init init_addsyscall(void)
     sys_call_table = (unsigned long *)sys_call_table_adress;          //获取系统调用服务首地址
     anything_saved = (int (*)(void))(sys_call_table[my_syscall_num]); //保存原始系统调用的地址
 
-    orig_cr0 = clear_and_return_cr0();                  //设置cr0可更改
-    sys_call_table[my_syscall_num] = (long)&sys_mycall; //更改原始的系统调用服务地址
-    setback_cr0(orig_cr0);                              //设置为原始的只读cr0
+    orig_cr0 = clear_and_return_cr0();                         //设置cr0可更改
+    sys_call_table[my_syscall_num] = (long)&__x86_sys_liyakai; //更改原始的系统调用服务地址
+    setback_cr0(orig_cr0);                                     //设置为原始的只读cr0
+
+    printk("=================");
 
     return 0;
 }
 
-asmlinkage int sys_mycall(void)
+asmlinkage int __x86_sys_liyakai(void)
 {
     int num = 1234;
     printk("This is my system call!\n");
