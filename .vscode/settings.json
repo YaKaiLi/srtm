@@ -2,6 +2,7 @@
     "files.associations": {
         "cjson.h": "c",
         "jsmn.h": "c",
-        "syscall.h": "c"
+        "syscall.h": "c",
+        "string.h": "c"
     }
 }

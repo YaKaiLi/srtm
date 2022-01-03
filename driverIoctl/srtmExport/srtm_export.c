@@ -581,13 +581,13 @@ asmlinkage int srtm_pull_image(char *ConfigJSONKernel)
 			kfree(lastChainID);
 			lastChainID = NULL;
 		}
-		lastChainID = kmalloc(1024, GFP_KERNEL);
+		lastChainID = kmalloc(88, GFP_KERNEL);
 		if (NULL == lastChainID)
 		{
 			printk("lastChainID kmalloc filed");
 			break;
 		}
-		memset(lastChainID, 0, 1024);
+		memset(lastChainID, 0, 88);
 		memmove(lastChainID, chainID, strlen(chainID));
 		printk(KERN_INFO "chainIDString: %s\n", chainID);
 
@@ -621,7 +621,14 @@ asmlinkage int srtm_pull_image(char *ConfigJSONKernel)
 		printk("[one layer over]==========================================[one layer over]\n");
 
 		//拷贝下一个diffIDWithSHA字符串
-		singleDiffIDWithSHA = strsep(&ConfigJSONKernel, delimComma);
+		if (ConfigJSONKernel != NULL)
+		{
+			singleDiffIDWithSHA = strsep(&ConfigJSONKernel, delimComma);
+		}
+		else
+		{
+			singleDiffIDWithSHA = NULL;
+		}
 	}
 	if (lastChainID)
 	{
@@ -686,14 +693,14 @@ asmlinkage static int srtm_run_container(char *ConfigJSONKernel)
 			kfree(lastChainID);
 			lastChainID = NULL;
 		}
-		lastChainID = kmalloc(1024, GFP_KERNEL);
+		lastChainID = kmalloc(88, GFP_KERNEL);
 		if (NULL == lastChainID)
 		{
 			printk("lastChainID kmalloc filed");
 			retRes = 403;
 			break;
 		}
-		memset(lastChainID, 0, 1024);
+		memset(lastChainID, 0, 88);
 		memmove(lastChainID, chainID, strlen(chainID));
 		printk(KERN_INFO "chainIDString: %s\n", chainID);
 
