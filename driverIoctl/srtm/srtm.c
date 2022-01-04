@@ -877,7 +877,7 @@ static long srtm_ioctl(struct file *file,
     case 0xFFFA:
 
         DiffIdPtrAndLength = kmalloc(sizeof(diffIDListAndLengthStruct), GFP_KERNEL);
-        if (NULL == DiffIdPtrAndLength)
+        if (DiffIdPtrAndLength == NULL)
         {
             printk("DiffIdPtrAndLength kmalloc filed");
             return -ENOMEM;
@@ -898,6 +898,12 @@ static long srtm_ioctl(struct file *file,
         if (configJSON != NULL)
         {
             kfree(configJSON);
+            configJSON = NULL;
+        }
+        if (DiffIdPtrAndLength != NULL)
+        {
+            kfree(DiffIdPtrAndLength);
+            DiffIdPtrAndLength = NULL;
         }
         ret = srtm_pull_image_ret;
         break;
@@ -924,6 +930,12 @@ static long srtm_ioctl(struct file *file,
         if (configJSON != NULL)
         {
             kfree(configJSON);
+            configJSON = NULL;
+        }
+        if (DiffIdPtrAndLength != NULL)
+        {
+            kfree(DiffIdPtrAndLength);
+            DiffIdPtrAndLength = NULL;
         }
         ret = srtm_run_container_ret;
 
