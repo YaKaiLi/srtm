@@ -186,13 +186,13 @@ int execTarCmd(char *readLayerDirPathBuffer, char *singleDiffIDWithSHA, const ch
 
     unsigned char *tarCommand = NULL;
 
-    tarCommand = kmalloc(1024, GFP_KERNEL);
+    tarCommand = kmalloc(288, GFP_KERNEL);
     if (tarCommand == NULL)
     {
         printk(KERN_ALERT "[execTarCmd] ERROR: kmalloc\n");
         return -1;
     }
-    memset(tarCommand, 0, 1024);
+    memset(tarCommand, 0, 288);
 
     //拼接打包命令
     strcat(tarCommand, tarCommandPrefix);
@@ -226,13 +226,13 @@ int execSha256Cmd(char *singleDiffIDWithSHA, const char *firstOrSecond)
 
     unsigned char *sha256Command = NULL;
 
-    sha256Command = kmalloc(1024, GFP_KERNEL);
+    sha256Command = kmalloc(288, GFP_KERNEL);
     if (sha256Command == NULL)
     {
         printk(KERN_ALERT "[execSha256Cmd] ERROR: kmalloc\n");
         return -1;
     }
-    memset(sha256Command, 0, 1024);
+    memset(sha256Command, 0, 288);
 
     //拼接打包命令
     strcat(sha256Command, sha256CommandPrefix);
@@ -281,20 +281,20 @@ unsigned char *getChainIDFromDiffID(char *singleDiffIDWithSHA, char *lastChainID
     else
     {
         //申请空间
-        diffIDWithLastChainID = kmalloc(1024, GFP_KERNEL);
+        diffIDWithLastChainID = kmalloc(188, GFP_KERNEL);
         if (diffIDWithLastChainID == NULL)
         {
             printk(KERN_ALERT "[getChainIDFromDiffID] ERROR: kmalloc\n");
             return NULL;
         }
-        memset(diffIDWithLastChainID, 0, 1024);
-        chainIDHex = kmalloc(1024, GFP_KERNEL);
+        memset(diffIDWithLastChainID, 0, 188);
+        chainIDHex = kmalloc(64, GFP_KERNEL);
         if (chainIDHex == NULL)
         {
             printk(KERN_ALERT "[getChainIDFromDiffID] ERROR: kmalloc\n");
             return NULL;
         }
-        memset(chainIDHex, 0, 1024);
+        memset(chainIDHex, 0, 64);
         // chainIDString = kmalloc(1024, GFP_KERNEL);
         // memset(chainIDString, 0, 1024);
         //开始拼接
@@ -308,18 +308,24 @@ unsigned char *getChainIDFromDiffID(char *singleDiffIDWithSHA, char *lastChainID
         // 	   chainIDHex[0], chainIDHex[1], chainIDHex[2], chainIDHex[3], chainIDHex[4],
         // 	   chainIDHex[5], chainIDHex[6], chainIDHex[7]);
 
-        chainIDString = hex2char(chainIDHex, strlen(chainIDHex));
+        // chainIDString = hex2char(chainIDHex, strlen(chainIDHex));
+        chainIDString = hex2char(chainIDHex, 32);
         // printk(KERN_INFO "chainIDString: %s\n", chainIDString);
 
-        if (diffIDWithLastChainID)
+        if (diffIDWithLastChainID != NULL)
         {
             kfree(diffIDWithLastChainID);
             diffIDWithLastChainID = NULL;
         }
-        if (chainIDHex)
+        if (chainIDHex != NULL)
         {
             kfree(chainIDHex);
             chainIDHex = NULL;
+        }
+        if (singleDiffIDWithSHACopy != NULL)
+        {
+            kfree(singleDiffIDWithSHACopy);
+            singleDiffIDWithSHACopy = NULL;
         }
         return chainIDString;
     }
@@ -337,13 +343,13 @@ char *getLayerKeyFromchainID(char *chainID)
     const size_t readLayerDirPathSize = 128;
     ssize_t readLayerDirPathBytes;
     // int addZeroLen = 0;
-    layerdbDir = kmalloc(1024, GFP_KERNEL);
+    layerdbDir = kmalloc(188, GFP_KERNEL);
     if (layerdbDir == NULL)
     {
         printk(KERN_ALERT "[getLayerKeyFromchainID] ERROR: kmalloc\n");
         return NULL;
     }
-    memset(layerdbDir, 0, 1024);
+    memset(layerdbDir, 0, 188);
 
     // printk(KERN_INFO "layerDeep: %d\n", layerDeep);
 
@@ -421,20 +427,25 @@ int verifySha256sum(char *singleDiffIDWithSHA)
     int retResult = -1;
 
     //申请空间
-    firstSha256FilePath = kmalloc(1024, GFP_KERNEL);
+    firstSha256FilePath = kmalloc(128, GFP_KERNEL);
     if (firstSha256FilePath == NULL)
     {
         printk(KERN_ALERT "[verifySha256sum] ERROR: firstSha256FilePath kmalloc\n");
         return -1;
     }
-    memset(firstSha256FilePath, 0, 1024);
-    secondSha256FilePath = kmalloc(1024, GFP_KERNEL);
+    memset(firstSha256FilePath, 0, 128);
+    secondSha256FilePath = kmalloc(128, GFP_KERNEL);
     if (secondSha256FilePath == NULL)
     {
+        if (firstSha256FilePath != NULL)
+        {
+            kfree(firstSha256FilePath);
+            firstSha256FilePath = NULL;
+        }
         printk(KERN_ALERT "[verifySha256sum] ERROR: secondSha256FilePath kmalloc\n");
         return -1;
     }
-    memset(secondSha256FilePath, 0, 1024);
+    memset(secondSha256FilePath, 0, 128);
     //拼接第一次sha256路径路径
     strcat(firstSha256FilePath, firstSha256FilePathPrefix);
     strcat(firstSha256FilePath, singleDiffIDWithSHA + 7);
@@ -445,6 +456,16 @@ int verifySha256sum(char *singleDiffIDWithSHA)
     readFirstSha256FileBuffer = kmalloc(readfirstSha256FileSize, GFP_KERNEL);
     if (readFirstSha256FileBuffer == NULL)
     {
+        if (firstSha256FilePath != NULL)
+        {
+            kfree(firstSha256FilePath);
+            firstSha256FilePath = NULL;
+        }
+        if (secondSha256FilePath != NULL)
+        {
+            kfree(secondSha256FilePath);
+            secondSha256FilePath = NULL;
+        }
         printk(KERN_ALERT "[verifySha256sum] ERROR: readFirstSha256FileBuffer kmalloc\n");
         return -1;
     }
@@ -452,7 +473,17 @@ int verifySha256sum(char *singleDiffIDWithSHA)
     if (readfirstSha256FileBytes < 0)
     {
         printk(KERN_INFO "readfirstSha256FileBytes length < 0\n");
-        if (readFirstSha256FileBuffer)
+        if (firstSha256FilePath != NULL)
+        {
+            kfree(firstSha256FilePath);
+            firstSha256FilePath = NULL;
+        }
+        if (secondSha256FilePath != NULL)
+        {
+            kfree(secondSha256FilePath);
+            secondSha256FilePath = NULL;
+        }
+        if (readFirstSha256FileBuffer != NULL)
         {
             kfree(readFirstSha256FileBuffer);
             readFirstSha256FileBuffer = NULL;
@@ -481,12 +512,42 @@ int verifySha256sum(char *singleDiffIDWithSHA)
     if (readSecondSha256FileBuffer == NULL)
     {
         printk(KERN_ALERT "[verifySha256sum] ERROR: readSecondSha256FileBuffer kmalloc\n");
+        if (firstSha256FilePath != NULL)
+        {
+            kfree(firstSha256FilePath);
+            firstSha256FilePath = NULL;
+        }
+        if (secondSha256FilePath != NULL)
+        {
+            kfree(secondSha256FilePath);
+            secondSha256FilePath = NULL;
+        }
+        if (readFirstSha256FileBuffer != NULL)
+        {
+            kfree(readFirstSha256FileBuffer);
+            readFirstSha256FileBuffer = NULL;
+        }
         return -1;
     }
     readsecondSha256FileBytes = file_read(secondSha256FilePath, readSecondSha256FileBuffer, readsecondSha256FileSize, 0);
     if (readsecondSha256FileBytes < 0)
     {
         printk(KERN_INFO "readsecondSha256FileBytes length < 0\n");
+        if (firstSha256FilePath != NULL)
+        {
+            kfree(firstSha256FilePath);
+            firstSha256FilePath = NULL;
+        }
+        if (secondSha256FilePath != NULL)
+        {
+            kfree(secondSha256FilePath);
+            secondSha256FilePath = NULL;
+        }
+        if (readFirstSha256FileBuffer != NULL)
+        {
+            kfree(readFirstSha256FileBuffer);
+            readFirstSha256FileBuffer = NULL;
+        }
         if (readSecondSha256FileBuffer)
         {
             kfree(readSecondSha256FileBuffer);
@@ -517,22 +578,22 @@ int verifySha256sum(char *singleDiffIDWithSHA)
     }
 
     //结束 释放变量
-    if (firstSha256FilePath)
+    if (firstSha256FilePath != NULL)
     {
         kfree(firstSha256FilePath);
         firstSha256FilePath = NULL;
     }
-    if (readFirstSha256FileBuffer)
+    if (readFirstSha256FileBuffer != NULL)
     {
         kfree(readFirstSha256FileBuffer);
         readFirstSha256FileBuffer = NULL;
     }
-    if (secondSha256FilePath)
+    if (secondSha256FilePath != NULL)
     {
         kfree(secondSha256FilePath);
         secondSha256FilePath = NULL;
     }
-    if (readSecondSha256FileBuffer)
+    if (readSecondSha256FileBuffer != NULL)
     {
         kfree(readSecondSha256FileBuffer);
         readSecondSha256FileBuffer = NULL;
@@ -643,9 +704,10 @@ int srtm_pull_image(char *ConfigJSONKernel)
             singleDiffIDWithSHA = NULL;
         }
     }
-    if (lastChainID)
+    if (lastChainID != NULL)
     {
         kfree(lastChainID);
+        lastChainID = NULL;
     }
 
     printk("[kernel function over]==========================================[kernel function over]\n");
@@ -739,12 +801,12 @@ int srtm_run_container(char *ConfigJSONKernel)
         printk(KERN_DEBUG "THe result of verifySha256sumResult is %d\n", sha256Result);
         if (verifySha256sumResult < 0)
         {
-            if (LayerKey)
+            if (LayerKey != NULL)
             {
                 kfree(LayerKey);
                 LayerKey = NULL;
             }
-            if (chainID)
+            if (chainID != NULL)
             {
                 kfree(chainID);
                 chainID = NULL;
@@ -753,12 +815,12 @@ int srtm_run_container(char *ConfigJSONKernel)
             break;
         }
 
-        if (LayerKey)
+        if (LayerKey != NULL)
         {
             kfree(LayerKey);
             LayerKey = NULL;
         }
-        if (chainID)
+        if (chainID != NULL)
         {
             kfree(chainID);
             chainID = NULL;
@@ -776,11 +838,6 @@ int srtm_run_container(char *ConfigJSONKernel)
 
     printk("[kernel function over]==========================================[kernel function over]\n");
 
-    if (ConfigJSONKernel)
-    {
-        kfree(ConfigJSONKernel);
-        ConfigJSONKernel = NULL;
-    }
     return retRes;
 }
 
