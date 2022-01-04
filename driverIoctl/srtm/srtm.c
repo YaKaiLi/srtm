@@ -81,7 +81,11 @@ static int calc_hash(struct crypto_shash *alg,
     }
 
     ret = crypto_shash_digest(&sdesc->shash, data, datalen, digest);
-    kfree(sdesc);
+    if (sdesc != NULL)
+    {
+        kfree(sdesc);
+        sdesc = NULL;
+    }
     return ret;
 }
 
@@ -377,7 +381,7 @@ char *getLayerKeyFromchainID(char *chainID)
     if (readLayerDirPathBytes < 0)
     {
         printk(KERN_INFO "readLayerDirPathBytes length < 0\n");
-        if (readLayerDirPathBuffer)
+        if (readLayerDirPathBuffer != NULL)
         {
             kfree(readLayerDirPathBuffer);
             readLayerDirPathBuffer = NULL;
@@ -397,7 +401,7 @@ char *getLayerKeyFromchainID(char *chainID)
     //读layerid目录路径完了
 
     //结束 释放变量
-    if (layerdbDir)
+    if (layerdbDir != NULL)
     {
         kfree(layerdbDir);
         layerdbDir = NULL;
@@ -548,7 +552,7 @@ int verifySha256sum(char *singleDiffIDWithSHA)
             kfree(readFirstSha256FileBuffer);
             readFirstSha256FileBuffer = NULL;
         }
-        if (readSecondSha256FileBuffer)
+        if (readSecondSha256FileBuffer != NULL)
         {
             kfree(readSecondSha256FileBuffer);
             readSecondSha256FileBuffer = NULL;
@@ -649,7 +653,7 @@ int srtm_pull_image(char *ConfigJSONKernel)
 
         chainID = getChainIDFromDiffID(singleDiffIDWithSHA, lastChainID);
 
-        if (lastChainID)
+        if (lastChainID != NULL)
         {
             printk(KERN_INFO "lastChainID: %s\n", lastChainID);
             kfree(lastChainID);
@@ -682,12 +686,12 @@ int srtm_pull_image(char *ConfigJSONKernel)
         printk(KERN_DEBUG "THe result of execSha256Cmd call_usermodehelper is %d\n", sha256Result);
 
         // LayerKey 置空
-        if (LayerKey)
+        if (LayerKey != NULL)
         {
             kfree(LayerKey);
             LayerKey = NULL;
         }
-        if (chainID)
+        if (chainID != NULL)
         {
             kfree(chainID);
             chainID = NULL;
