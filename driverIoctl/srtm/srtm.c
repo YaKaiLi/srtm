@@ -762,7 +762,7 @@ int srtm_run_container(char *ConfigJSONKernel)
 
         chainID = getChainIDFromDiffID(singleDiffIDWithSHA, lastChainID);
 
-        if (lastChainID)
+        if (lastChainID != NULL)
         {
             printk(KERN_INFO "lastChainID: %s\n", lastChainID);
             kfree(lastChainID);
