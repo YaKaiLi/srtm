@@ -269,6 +269,13 @@ unsigned char *getChainIDFromDiffID(char *singleDiffIDWithSHA, char *lastChainID
     unsigned char *diffIDWithLastChainIDPrefix = "sha256:";
     unsigned char *diffIDWithLastChainIDMiddle = " ";
     unsigned char *singleDiffIDWithSHACopy = NULL;
+
+    if (singleDiffIDWithSHA == NULL)
+    {
+        printk(KERN_ALERT "[getChainIDFromDiffID] ERROR: singleDiffIDWithSHA is NULL\n");
+        return NULL;
+    }
+
     singleDiffIDWithSHACopy = kmalloc(strlen(singleDiffIDWithSHA) + 1, GFP_KERNEL);
     if (singleDiffIDWithSHACopy == NULL)
     {
@@ -288,14 +295,14 @@ unsigned char *getChainIDFromDiffID(char *singleDiffIDWithSHA, char *lastChainID
         diffIDWithLastChainID = kmalloc(188, GFP_KERNEL);
         if (diffIDWithLastChainID == NULL)
         {
-            printk(KERN_ALERT "[getChainIDFromDiffID] ERROR: kmalloc\n");
+            printk(KERN_ALERT "[getChainIDFromDiff ID] ERROR: kmalloc\n");
             return NULL;
         }
         memset(diffIDWithLastChainID, 0, 188);
         chainIDHex = kmalloc(64, GFP_KERNEL);
         if (chainIDHex == NULL)
         {
-            printk(KERN_ALERT "[getChainIDFromDiffID] ERROR: kmalloc\n");
+            printk(KERN_ALERT "[getChainIDFromDiff ID] ERROR: kmalloc\n");
             return NULL;
         }
         memset(chainIDHex, 0, 64);
@@ -347,6 +354,13 @@ char *getLayerKeyFromchainID(char *chainID)
     const size_t readLayerDirPathSize = 128;
     ssize_t readLayerDirPathBytes;
     // int addZeroLen = 0;
+
+    if (chainID == NULL)
+    {
+        printk(KERN_ALERT "[getLayerKeyFromchainID] ERROR: chainID is NULL\n");
+        return NULL;
+    }
+
     layerdbDir = kmalloc(188, GFP_KERNEL);
     if (layerdbDir == NULL)
     {
@@ -355,10 +369,7 @@ char *getLayerKeyFromchainID(char *chainID)
     }
     memset(layerdbDir, 0, 188);
 
-    // printk(KERN_INFO "layerDeep: %d\n", layerDeep);
-
     // printk("%s\n", singleDiffIDWithSHA);
-    // singleDiffID = chainID + 7;
     printk("chainID: %s\n", chainID);
 
     //拼接diffID路径
@@ -660,8 +671,13 @@ int srtm_pull_image(char *ConfigJSONKernel)
             lastChainID = NULL;
         }
         lastChainID = kmalloc(88, GFP_KERNEL);
-        if (NULL == lastChainID)
+        if (lastChainID == NULL)
         {
+            if (chainID != NULL)
+            {
+                kfree(chainID);
+                chainID = NULL;
+            }
             printk("lastChainID kmalloc filed");
             break;
         }
@@ -672,6 +688,11 @@ int srtm_pull_image(char *ConfigJSONKernel)
         LayerKey = getLayerKeyFromchainID(chainID);
         if (LayerKey == NULL)
         {
+            if (chainID != NULL)
+            {
+                kfree(chainID);
+                chainID = NULL;
+            }
             printk(KERN_INFO "LayerKey is NULL");
             break;
         }
@@ -773,7 +794,7 @@ int srtm_run_container(char *ConfigJSONKernel)
             lastChainID = NULL;
         }
         lastChainID = kmalloc(88, GFP_KERNEL);
-        if (NULL == lastChainID)
+        if (lastChainID == NULL)
         {
             printk("lastChainID kmalloc filed");
             retRes = 403;
