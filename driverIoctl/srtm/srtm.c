@@ -470,7 +470,7 @@ int verifySha256sum(char *singleDiffIDWithSHA)
     firstSha256FilePath = kmalloc(128, GFP_KERNEL);
     if (firstSha256FilePath == NULL)
     {
-        printk(KERN_ALERT "[verifySha256sum] ERROR: firstSha256FilePath kmalloc\n");
+        printk(KERN_ALERT "[verify Sha256sum] ERROR: firstSha256FilePath kmalloc\n");
         return -1;
     }
     memset(firstSha256FilePath, 0, 128);
@@ -482,7 +482,7 @@ int verifySha256sum(char *singleDiffIDWithSHA)
             kfree(firstSha256FilePath);
             firstSha256FilePath = NULL;
         }
-        printk(KERN_ALERT "[verifySha256sum] ERROR: secondSha256FilePath kmalloc\n");
+        printk(KERN_ALERT "[verify Sha256sum] ERROR: secondSha256FilePath kmalloc\n");
         return -1;
     }
     memset(secondSha256FilePath, 0, 128);
@@ -506,7 +506,7 @@ int verifySha256sum(char *singleDiffIDWithSHA)
             kfree(secondSha256FilePath);
             secondSha256FilePath = NULL;
         }
-        printk(KERN_ALERT "[verifySha256sum] ERROR: readFirstSha256FileBuffer kmalloc\n");
+        printk(KERN_ALERT "[verify Sha256sum] ERROR: readFirstSha256FileBuffer kmalloc\n");
         return -1;
     }
     readfirstSha256FileBytes = file_read(firstSha256FilePath, readFirstSha256FileBuffer, readfirstSha256FileSize, 0);
@@ -537,7 +537,7 @@ int verifySha256sum(char *singleDiffIDWithSHA)
         // printk(KERN_INFO "addZeroLen %ld\n", readfirstSha256FileBytes % (readfirstSha256FileSize - 1));
         // printk(KERN_INFO "bytes read %d\n", (unsigned int)readfirstSha256FileBytes);
         readFirstSha256FileBuffer[readfirstSha256FileBytes % (readfirstSha256FileSize - 1)] = '\0';
-        printk(KERN_INFO "[verifySha256sum]read string: %s\n", readFirstSha256FileBuffer);
+        printk(KERN_INFO "[verify Sha256sum]read string: %s\n", readFirstSha256FileBuffer);
     }
     //读文件完了
 
@@ -551,7 +551,7 @@ int verifySha256sum(char *singleDiffIDWithSHA)
     readSecondSha256FileBuffer = kmalloc(readsecondSha256FileSize, GFP_KERNEL);
     if (readSecondSha256FileBuffer == NULL)
     {
-        printk(KERN_ALERT "[verifySha256sum] ERROR: readSecondSha256FileBuffer kmalloc\n");
+        printk(KERN_ALERT "[verify Sha256sum] ERROR: readSecondSha256FileBuffer kmalloc\n");
         if (firstSha256FilePath != NULL)
         {
             kfree(firstSha256FilePath);
@@ -602,12 +602,12 @@ int verifySha256sum(char *singleDiffIDWithSHA)
         // printk(KERN_INFO "addZeroLen %ld\n", readfirstSha256FileBytes % (readfirstSha256FileSize - 1));
         // printk(KERN_INFO "bytes read %d\n", (unsigned int)readfirstSha256FileBytes);
         readSecondSha256FileBuffer[readsecondSha256FileBytes % (readsecondSha256FileSize - 1)] = '\0';
-        printk(KERN_INFO "[verifySha256sum] second read string: %s\n", readSecondSha256FileBuffer);
+        printk(KERN_INFO "[verify Sha256sum] second read string: %s\n", readSecondSha256FileBuffer);
     }
     //读文件完了
 
     compareResult = strncmp(readFirstSha256FileBuffer, readSecondSha256FileBuffer, 64);
-    printk(KERN_INFO "[verifySha256sum] compareResult: %d\n", compareResult);
+    printk(KERN_INFO "[verify Sha256sum] compareResult: %d\n", compareResult);
     if (compareResult == 0)
     {
         retResult = 1;
@@ -687,6 +687,11 @@ int srtm_pull_image(char *ConfigJSONKernel)
         printk(KERN_INFO "singleDiffIDWithSHA length: %ld\n", strlen(singleDiffIDWithSHA));
 
         chainID = getChainIDFromDiffID(singleDiffIDWithSHA, lastChainID);
+        if (chainID == NULL)
+        {
+            printk(KERN_INFO "getChainIDFromDiff ID failed\n");
+            break;
+        }
 
         if (lastChainID != NULL)
         {
@@ -744,14 +749,7 @@ int srtm_pull_image(char *ConfigJSONKernel)
         printk("[one layer over]==========================================[one layer over]\n");
 
         //拷贝下一个diffIDWithSHA字符串
-        if (ConfigJSONKernel != NULL)
-        {
-            singleDiffIDWithSHA = strsep(&ConfigJSONKernel, delimComma);
-        }
-        else
-        {
-            singleDiffIDWithSHA = NULL;
-        }
+        singleDiffIDWithSHA = strsep(&ConfigJSONKernel, delimComma);
     }
     if (lastChainID != NULL)
     {
@@ -789,8 +787,13 @@ int srtm_run_container(char *ConfigJSONKernel)
     int retRes = 666;
 
     // int i = 0;
-    printk("srtm_run_container is successful!\n");
+    printk("srtm_run_ container is runing!\n");
 
+    if (ConfigJSONKernel == NULL)
+    {
+        printk("ConfigJSONKernel isn't NULL\n");
+        return 1;
+    }
     printk("ConfigJSONKernel *s: %s", ConfigJSONKernel);
 
     // attaction:strsep函数会修改ConfigJSONKernel字符串数据
@@ -810,6 +813,12 @@ int srtm_run_container(char *ConfigJSONKernel)
         printk(KERN_INFO "singleDiffIDWithSHA length: %ld\n", strlen(singleDiffIDWithSHA));
 
         chainID = getChainIDFromDiffID(singleDiffIDWithSHA, lastChainID);
+        if (chainID == NULL)
+        {
+            printk(KERN_INFO "getChainIDFromDiff ID failed\n");
+            retRes = 403;
+            break;
+        }
 
         if (lastChainID != NULL)
         {
@@ -821,6 +830,11 @@ int srtm_run_container(char *ConfigJSONKernel)
         if (lastChainID == NULL)
         {
             printk("lastChainID kmalloc filed");
+            if (chainID != NULL)
+            {
+                kfree(chainID);
+                chainID = NULL;
+            }
             retRes = 403;
             break;
         }
@@ -833,6 +847,11 @@ int srtm_run_container(char *ConfigJSONKernel)
         {
             printk(KERN_INFO "LayerKey is NULL");
             retRes = 403;
+            if (chainID != NULL)
+            {
+                kfree(chainID);
+                chainID = NULL;
+            }
             break;
         }
         printk(KERN_INFO "[LayerKey]%s\n", LayerKey);
@@ -969,15 +988,16 @@ static long srtm_ioctl(struct file *file,
         configJSON = kmalloc(sizeof(char) * (lenConfigJSON + 1), GFP_KERNEL);
         copy_from_user_ret = copy_from_user(configJSON, DiffIdPtrAndLength->ConfigJSON, sizeof(char) * lenConfigJSON);
         configJSON[lenConfigJSON] = '\0';
+        configJSONForFree = configJSON;
         srtm_run_container_ret = srtm_run_container(configJSON);
 
-        printk(KERN_INFO "0xFFFA copy_from_user_ret: %d, DiffIDListLength: %d, srtm_run_container_ret:%d\n",
+        printk(KERN_INFO "0xFFFB copy_from_user_ret: %d, DiffIDListLength: %d, srtm_run_container_ret:%d\n",
                copy_from_user_ret,
                lenConfigJSON, srtm_run_container_ret);
-        if (configJSON != NULL)
+        if (configJSONForFree != NULL)
         {
-            kfree(configJSON);
-            configJSON = NULL;
+            kfree(configJSONForFree);
+            configJSONForFree = NULL;
         }
         if (DiffIdPtrAndLength != NULL)
         {
