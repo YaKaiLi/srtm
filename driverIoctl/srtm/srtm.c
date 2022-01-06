@@ -267,27 +267,27 @@ unsigned char *getChainIDFromDiffID(char *singleDiffIDWithSHA, char *lastChainID
     unsigned char *chainIDHex = NULL;
     unsigned char *chainIDString = NULL;
     unsigned char *diffIDWithLastChainIDPrefix = "sha256:";
-    unsigned char *diffIDWithLastChainIDMiddle = " ";
+    unsigned char *diffIDWithLastChainIDMiddle = " sha256:";
     unsigned char *singleDiffIDWithSHACopy = NULL;
 
     if (singleDiffIDWithSHA == NULL)
     {
-        printk(KERN_ALERT "[getChainIDFromDiffID] ERROR: singleDiffIDWithSHA is NULL\n");
+        printk(KERN_ALERT "[getChainIDFromDiff ID] ERROR: singleDiffIDWithSHA is NULL\n");
         return NULL;
     }
 
-    singleDiffIDWithSHACopy = kmalloc(strlen(singleDiffIDWithSHA) + 1, GFP_KERNEL);
+    singleDiffIDWithSHACopy = kmalloc(strlen(singleDiffIDWithSHA + 7) + 1, GFP_KERNEL);
     if (singleDiffIDWithSHACopy == NULL)
     {
-        printk(KERN_ALERT "[getChainIDFromDiffID] ERROR: singleDiffIDWithSHACopy kmalloc\n");
+        printk(KERN_ALERT "[getChainIDFromDiff ID] ERROR: singleDiffIDWithSHACopy kmalloc\n");
         return NULL;
     }
-    memset(singleDiffIDWithSHACopy, 0, strlen(singleDiffIDWithSHA) + 1);
-    memmove(singleDiffIDWithSHACopy, singleDiffIDWithSHA, strlen(singleDiffIDWithSHA));
+    memset(singleDiffIDWithSHACopy, 0, strlen(singleDiffIDWithSHA + 7) + 1);
+    memmove(singleDiffIDWithSHACopy, singleDiffIDWithSHA + 7, strlen(singleDiffIDWithSHA + 7));
     // char *diffIDWithLastChainIDSuffix = "/diff";
     if (lastChainID == NULL)
     {
-        return singleDiffIDWithSHACopy + 7;
+        return singleDiffIDWithSHACopy;
     }
     else
     {
@@ -295,6 +295,11 @@ unsigned char *getChainIDFromDiffID(char *singleDiffIDWithSHA, char *lastChainID
         diffIDWithLastChainID = kmalloc(188, GFP_KERNEL);
         if (diffIDWithLastChainID == NULL)
         {
+            if (singleDiffIDWithSHACopy != NULL)
+            {
+                kfree(singleDiffIDWithSHACopy);
+                singleDiffIDWithSHACopy = NULL;
+            }
             printk(KERN_ALERT "[getChainIDFromDiff ID] ERROR: kmalloc\n");
             return NULL;
         }
@@ -302,6 +307,16 @@ unsigned char *getChainIDFromDiffID(char *singleDiffIDWithSHA, char *lastChainID
         chainIDHex = kmalloc(64, GFP_KERNEL);
         if (chainIDHex == NULL)
         {
+            if (diffIDWithLastChainID != NULL)
+            {
+                kfree(diffIDWithLastChainID);
+                diffIDWithLastChainID = NULL;
+            }
+            if (singleDiffIDWithSHACopy != NULL)
+            {
+                kfree(singleDiffIDWithSHACopy);
+                singleDiffIDWithSHACopy = NULL;
+            }
             printk(KERN_ALERT "[getChainIDFromDiff ID] ERROR: kmalloc\n");
             return NULL;
         }
@@ -343,7 +358,7 @@ unsigned char *getChainIDFromDiffID(char *singleDiffIDWithSHA, char *lastChainID
 }
 
 //通过chainID获取LayerKey
-char *getLayerKeyFromchainID(char *chainID)
+unsigned char *getLayerKeyFromchainID(char *chainID)
 {
     //从chainID中获取lay目录字段
     unsigned char *layerdbDirPrefix = "/var/lib/docker/image/overlay2/layerdb/sha256/";
@@ -357,14 +372,14 @@ char *getLayerKeyFromchainID(char *chainID)
 
     if (chainID == NULL)
     {
-        printk(KERN_ALERT "[getLayerKeyFromchainID] ERROR: chainID is NULL\n");
+        printk(KERN_ALERT "[getLayerKeyFromchain ID] ERROR: chainID is NULL\n");
         return NULL;
     }
 
     layerdbDir = kmalloc(188, GFP_KERNEL);
     if (layerdbDir == NULL)
     {
-        printk(KERN_ALERT "[getLayerKeyFromchainID] ERROR: kmalloc\n");
+        printk(KERN_ALERT "[getLayerKeyFromchain ID] ERROR: kmalloc\n");
         return NULL;
     }
     memset(layerdbDir, 0, 188);
@@ -385,7 +400,12 @@ char *getLayerKeyFromchainID(char *chainID)
     readLayerDirPathBuffer = kmalloc(readLayerDirPathSize, GFP_KERNEL);
     if (readLayerDirPathBuffer == NULL)
     {
-        printk(KERN_ALERT "[getLayerKeyFromchainID] ERROR: kmalloc\n");
+        if (layerdbDir != NULL)
+        {
+            kfree(layerdbDir);
+            layerdbDir = NULL;
+        }
+        printk(KERN_ALERT "[getLayerKeyFromchain ID] ERROR: kmalloc\n");
         return NULL;
     }
     readLayerDirPathBytes = file_read(layerdbDir, readLayerDirPathBuffer, readLayerDirPathSize, 0);
@@ -396,6 +416,11 @@ char *getLayerKeyFromchainID(char *chainID)
         {
             kfree(readLayerDirPathBuffer);
             readLayerDirPathBuffer = NULL;
+        }
+        if (layerdbDir != NULL)
+        {
+            kfree(layerdbDir);
+            layerdbDir = NULL;
         }
         return NULL;
     }
@@ -616,7 +641,6 @@ int verifySha256sum(char *singleDiffIDWithSHA)
     return retResult;
 }
 
-/* srtm_pull_image 函数 */
 int srtm_pull_image(char *ConfigJSONKernel)
 {
     // char **uintptrConfigJSON, int *uintptrConfigJSONLen
@@ -638,7 +662,7 @@ int srtm_pull_image(char *ConfigJSONKernel)
     int sha256Result = 0;
 
     // int i = 0;
-    printk("srtm_pull_image export is successful!\n");
+    printk("srtm_pull_ image is running!\n");
 
     printk("ConfigJSONKernel *s: %s", ConfigJSONKernel);
     if (ConfigJSONKernel == NULL)
@@ -888,6 +912,7 @@ static long srtm_ioctl(struct file *file,
     diffIDListAndLengthStruct *DiffIdPtrAndLength = NULL;
     int copy_from_user_ret = 0;
     char *configJSON = NULL;
+    char *configJSONForFree = NULL;
     int lenConfigJSON = 0;
     int srtm_pull_image_ret = 0;
     int srtm_run_container_ret = 0;
@@ -911,15 +936,16 @@ static long srtm_ioctl(struct file *file,
         configJSON = kmalloc(sizeof(char) * (lenConfigJSON + 1), GFP_KERNEL);
         copy_from_user_ret = copy_from_user(configJSON, DiffIdPtrAndLength->ConfigJSON, sizeof(char) * lenConfigJSON);
         configJSON[lenConfigJSON] = '\0';
+        configJSONForFree = configJSON;
         srtm_pull_image_ret = srtm_pull_image(configJSON);
 
-        printk(KERN_INFO "0xFFFA copy_from_user_ret: %d, DiffIDListLength: %d, srtm_pull_image_ret:%d\n",
+        printk(KERN_INFO "0xFFFA copy_from_user_ret: %d, DiffIDListLength: %d, srtm_pull_ image_ret:%d\n",
                copy_from_user_ret,
                lenConfigJSON, srtm_pull_image_ret);
-        if (configJSON != NULL)
+        if (configJSONForFree != NULL)
         {
-            kfree(configJSON);
-            configJSON = NULL;
+            kfree(configJSONForFree);
+            configJSONForFree = NULL;
         }
         if (DiffIdPtrAndLength != NULL)
         {
