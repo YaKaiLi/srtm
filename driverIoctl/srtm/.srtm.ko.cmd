@@ -1,0 +1,1 @@
+cmd_/root/srtm/driverIoctl/srtm/srtm.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000 -T ./scripts/module-common.lds  --build-id  -o /root/srtm/driverIoctl/srtm/srtm.ko /root/srtm/driverIoctl/srtm/srtm.o /root/srtm/driverIoctl/srtm/srtm.mod.o ;  true
